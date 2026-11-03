@@ -12,6 +12,7 @@ Commands:
   symptoms     list distinct symptom names in symptoms/log.csv
   blind-pack   write scratch/blind_<date>.md: the record without any model reasoning
   dedupe       check incoming files against source/ by checksum before an ingest
+  genetics     read the ClinVar match table: summary, or list with tier/gene/star/ACMG filters
 
 Run from anywhere inside the record; the repository root is located
 automatically.
@@ -1052,6 +1053,90 @@ def cmd_dedupe(args) -> int:
     return 0
 
 
+
+def load_variants(path: Path) -> list[dict]:
+    with path.open(newline="", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
+GENETICS_TIERS = ["pathogenic", "conflicting", "risk", "drug_response", "uncertain", "other", "benign"]
+
+
+def fmt_variant(r: dict) -> str:
+    var = f"{r['chrom']}:{r['pos']} {r['ref']}>{r['alt']}"
+    if len(var) > 30:
+        var = var[:29] + "~"
+    zyg = {"heterozygous": "het", "homozygous": "hom", "hemizygous": "hemi"}.get(r["zygosity"], r["zygosity"][:4])
+    flags = ("A" if r.get("acmg_sf") else "-") + ("L" if r.get("low_penetrance") else "-")
+    cond = r["conditions"].replace("_", " ")
+    return (f"{r['gene'][:11]:<12}{var:<31}{zyg:<5}{r['stars']}* {flags} {r['tier'][:12]:<13}"
+            f"{r['clinsig'][:34]:<35}{cond[:60]}")
+
+
+def cmd_genetics(args) -> int:
+    path = Path(args.file) if args.file else ROOT / "data" / "genetics" / "variants.csv"
+    if not path.exists():
+        print(f"genetics: {rel(path) if path.is_relative_to(ROOT) else path} not found")
+        return 1
+    rows = load_variants(path)
+    if args.genetics_cmd == "summary":
+        tiers = {t: sum(1 for r in rows if r["tier"] == t) for t in GENETICS_TIERS}
+        print(f"file: {path}  rows: {len(rows)}")
+        print("by tier: " + ", ".join(f"{t} {n}" for t, n in tiers.items() if n))
+        for t in ("pathogenic", "conflicting"):
+            dist: dict[str, int] = {}
+            for r in rows:
+                if r["tier"] == t:
+                    dist[r["stars"]] = dist.get(r["stars"], 0) + 1
+            if dist:
+                print(f"{t} by stars: " + ", ".join(f"{s}* {n}" for s, n in sorted(dist.items(), reverse=True)))
+        zyg: dict[str, int] = {}
+        for r in rows:
+            if r["tier"] == "pathogenic":
+                zyg[r["zygosity"]] = zyg.get(r["zygosity"], 0) + 1
+        if zyg:
+            print("pathogenic by zygosity: " + ", ".join(f"{k} {v}" for k, v in zyg.items()))
+        acmg = sorted({r["gene"] for r in rows if r.get("acmg_sf")})
+        acmg_p = sorted({r["gene"] for r in rows if r.get("acmg_sf") and r["tier"] == "pathogenic"})
+        print(f"ACMG SF genes with any match: {len(acmg)}; with a pathogenic match: {', '.join(acmg_p) or 'none'}")
+        run = path.with_name(path.name.replace("_matches.csv", "_run.json"))
+        if run.exists():
+            m = json.loads(run.read_text())
+            g = m.get("genome", {})
+            print(f"run: tool {m.get('tool_version')} at {m.get('run_at')}; build {m['vcf'].get('build')}; "
+                  f"sample {m['vcf'].get('sample')}; vcf sha256 {m['vcf'].get('sha256', '')[:16]}")
+            print(f"ClinVar release {m['clinvar'].get('release')}; filters {m.get('filters')}")
+            print(f"genome: records {g.get('records'):,}, carried sites {g.get('variant_sites'):,}, "
+                  f"filtered {g.get('filtered_out'):,}, hom-ref {g.get('hom_ref_sites'):,}, "
+                  f"missing GT {g.get('missing_genotype'):,}")
+            print(f"previous run: {m.get('previous_run') or 'none'}; changes: {m.get('changes')}")
+        return 0
+    # list
+    sel = rows
+    if args.tier:
+        want = [x.strip() for x in args.tier.split(",")]
+        sel = [r for r in sel if r["tier"] in want]
+    if args.gene:
+        want_g = {x.strip().upper() for x in args.gene.split(",")}
+        sel = [r for r in sel if r["gene"].upper() in want_g]
+    if args.acmg:
+        sel = [r for r in sel if r.get("acmg_sf")]
+    if args.min_stars:
+        sel = [r for r in sel if int(r["stars"] or 0) >= args.min_stars]
+    if args.search:
+        s = args.search.lower().replace(" ", "_")
+        sel = [r for r in sel if s in (r["conditions"] + "|" + r["gene"] + "|" + r["clinsig"]).lower()]
+    sel.sort(key=lambda r: (GENETICS_TIERS.index(r["tier"]) if r["tier"] in GENETICS_TIERS else 99,
+                            -int(r["stars"] or 0), r["gene"]))
+    print(f"{'gene':<12}{'variant':<31}{'zyg':<5}{'st':<3}{'fl':<3}{'tier':<13}{'clinsig':<35}conditions   (fl: A=ACMG SF, L=low penetrance)")
+    for r in sel[:args.limit]:
+        print(fmt_variant(r))
+    if len(sel) > args.limit:
+        print(f"({len(sel) - args.limit} more; raise --limit or narrow the filters)")
+    print(f"{min(len(sel), args.limit)} of {len(sel)} selected, {len(rows)} total")
+    return 0
+
+
 # --------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------
@@ -1108,6 +1193,20 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("dedupe", help="check incoming files against source/ by checksum")
     p.add_argument("paths", nargs="+", help="files or directories to check")
     p.set_defaults(fn=cmd_dedupe)
+
+    p = sub.add_parser("genetics", help="read the ClinVar match table")
+    gs = p.add_subparsers(dest="genetics_cmd", required=True)
+    g1 = gs.add_parser("summary", help="counts by tier, stars, zygosity, ACMG genes; run metadata when beside the file")
+    g1.add_argument("--file", help="matches CSV (default data/genetics/variants.csv)")
+    g2 = gs.add_parser("list", help="one line per match, filtered")
+    g2.add_argument("--file", help="matches CSV (default data/genetics/variants.csv)")
+    g2.add_argument("--tier", help="comma-separated tiers, e.g. pathogenic,conflicting")
+    g2.add_argument("--gene", help="comma-separated gene symbols")
+    g2.add_argument("--acmg", action="store_true", help="only ACMG secondary-findings genes")
+    g2.add_argument("--min-stars", type=int, default=0)
+    g2.add_argument("--search", help="substring of condition, gene or classification")
+    g2.add_argument("--limit", type=int, default=200)
+    p.set_defaults(fn=cmd_genetics)
 
     p = sub.add_parser("blind-pack", help="write scratch/blind_<date>.md for a second opinion")
     p.set_defaults(fn=cmd_blind_pack)

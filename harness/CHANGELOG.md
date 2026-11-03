@@ -5,6 +5,18 @@ Patient records carry the harness version in every file they write
 what changed and whether a record written under an older version needs
 migrating.
 
+## 1.2.1 — 2026-11-03
+
+From the first real ClinVar ingest. No migration needed.
+
+- `msdh.py genetics summary|list` reads the match table with tier, gene,
+  star, ACMG and keyword filters, and prints run metadata compactly. The
+  agent had written its own viewer in scratch; now it does not have to.
+- Tool 2.0.1: per-chromosome counts in `_run.json` limited to canonical
+  contigs (a GRCh38 VCF has about 1,600), which made the file unreadable
+  in one screen. Already-written run files are fine as they are.
+- Genetics procedure reads runs and matches through the script.
+
 ## 1.2.0 — 2026-11-03
 
 Genetics. No migration needed.

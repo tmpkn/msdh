@@ -35,17 +35,33 @@ The newest release date not yet represented in `data/genetics/` is the one
 to ingest. The three files share the date. If `_run.json` is missing, the
 run is incomplete; ask the patient to re-run.
 
-Read `_run.json` in full. Check that `vcf.sha256` matches the previous
+Do not print `_run.json` raw. Read it through:
+
+```
+python3 harness/scripts/msdh.py genetics summary --file source/<release>_clinvar_matches.csv
+```
+
+Check that the VCF checksum matches the previous
 report's `vcf_sha256` if there is one; a different genome is a different
 patient, or a re-sequencing, and either needs the patient's confirmation.
 
 ## 3. Read the matches
 
 Read `_changes.csv` first if it exists; that is what is new. Then the
-matches CSV, tier by tier. For a first run that is a long list; the
-`uncertain` tier can be thousands of rows and is not read line by line.
-Read `pathogenic`, `conflicting`, `risk` and `drug_response` in full, and
-search `uncertain` for genes that connect to this patient (step 4).
+matches, tier by tier, through the script rather than by printing the CSV:
+
+```
+python3 harness/scripts/msdh.py genetics list --file source/<release>_clinvar_matches.csv --tier pathogenic,conflicting
+python3 harness/scripts/msdh.py genetics list --file ... --tier risk,drug_response
+python3 harness/scripts/msdh.py genetics list --file ... --tier uncertain,other --acmg
+python3 harness/scripts/msdh.py genetics list --file ... --gene PRSS1,UGT1A1
+python3 harness/scripts/msdh.py genetics list --file ... --search pancreat
+```
+
+Read `pathogenic`, `conflicting`, `risk` and `drug_response` in full. The
+`uncertain` tier can run to thousands of rows; read it by ACMG flag, by
+gene and by condition keyword taken from the patient's problem list, not
+line by line. After ingest the same commands work without `--file`.
 
 For each pathogenic or likely pathogenic match with two or more stars,
 work out what the zygosity means for the condition named. ClinVar does not

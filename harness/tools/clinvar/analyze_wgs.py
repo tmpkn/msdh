@@ -35,7 +35,7 @@ import urllib.request
 from collections import Counter
 from pathlib import Path
 
-VERSION = "2.0.0"
+VERSION = "2.0.1"
 CLINVAR_BASE = "https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_{build}/clinvar.vcf.gz"
 BUILD_CONTIG_LENGTHS = {
     "GRCh38": {"1": 248956422, "2": 242193529, "X": 156040895},
@@ -436,6 +436,26 @@ CHANGE_COLUMNS = ["change", "chrom", "pos", "ref", "alt", "gene", "zygosity",
                   "old_tier", "new_tier", "old_clinsig", "new_clinsig", "old_stars", "new_stars"]
 
 
+CANONICAL = [str(i) for i in range(1, 23)] + ["X", "Y", "MT"]
+
+
+def genome_stats(stats: dict) -> dict:
+    """Counters as plain dicts; per-chromosome counts limited to the canonical
+    contigs so the metadata file stays readable (a GRCh38 VCF has 1,600 contigs)."""
+    out: dict = {}
+    for k, v in stats.items():
+        if k == "by_chrom":
+            canon = {c: v[c] for c in CANONICAL if c in v}
+            other = {c: n for c, n in v.items() if c not in canon}
+            out["by_chrom"] = canon
+            out["other_contigs"] = {"contigs": len(other), "variant_sites": sum(other.values())}
+        elif isinstance(v, Counter):
+            out[k] = dict(v)
+        else:
+            out[k] = v
+    return out
+
+
 def print_summary(stats: dict, matches: list[dict], changes: list[dict] | None, build: str, release: str) -> None:
     print("\n=== genome ===")
     print(f"build {build}; records {stats['records']:,}; carried variant sites {stats['variant_sites']:,}; "
@@ -548,7 +568,7 @@ def main(argv: list[str] | None = None) -> int:
         "filters": {"include_filtered": args.include_filtered, "min_qual": args.min_qual,
                     "include_benign": args.include_benign,
                     "genes": sorted(include), "exclude_genes_count": len(exclude)},
-        "genome": {k: (dict(v) if isinstance(v, Counter) else v) for k, v in stats.items()},
+        "genome": genome_stats(stats),
         "matches": {"total": len(matches), "by_tier": dict(Counter(m["tier"] for m in matches)),
                     "pathogenic_2plus_stars": sum(1 for m in matches if m["tier"] == "pathogenic" and int(m["stars"]) >= 2),
                     "acmg_sf_genes_hit": sorted({m["gene"] for m in matches if m["acmg_sf"]})},

@@ -20,7 +20,7 @@ CSV in git. Design rationale is in `harness/PRINCIPLES.md`.
    cd my-record
    git remote rename origin upstream
    git remote add origin <your-private-repo-url>
-   git push -u origin main
+   git push -u origin master
    ```
 
 3. Open your agent in `my-record` and say: *"onboard me"*. The agent will ask
@@ -44,7 +44,7 @@ Every change is committed with the model that made it stamped in the commit.
 ## Update the harness
 
 ```
-git pull upstream main
+git pull upstream master
 ```
 
 The harness only ever touches `AGENTS.md`, `CLAUDE.md`, `README.md`,

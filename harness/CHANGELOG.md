@@ -13,10 +13,6 @@ Initial release.
 - Schemas for profile, summary, labs, visits, other inputs, symptoms,
   diagnoses and chats; canonical analyte list.
 - Procedures: session-start, onboarding, commit (with corrections),
-  summary-refresh.
+  summary-refresh, ingest, visit, adhoc, second-opinion, harness-update.
 - `harness/scripts/msdh.py`: session, status, check-remote, validate,
-  commit, tag, labs rebuild/list/trend, symptoms.
-
-Not yet in this version: ingest, visit, adhoc, second-opinion and
-harness-update procedures. `AGENTS.md` tells agents to refuse those
-operations until the procedure file exists.
+  commit, tag, labs rebuild/list/trend, symptoms, blind-pack.

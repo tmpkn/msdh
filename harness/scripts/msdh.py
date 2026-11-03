@@ -10,6 +10,7 @@ Commands:
   tag          create an annotated milestone tag
   labs         rebuild data/labs_all.csv, or show a trend for one analyte
   symptoms     list distinct symptom names in symptoms/log.csv
+  blind-pack   write scratch/blind_<date>.md: the record without any model reasoning
 
 Run from anywhere inside the record; the repository root is located
 automatically.
@@ -865,6 +866,55 @@ def cmd_symptoms(args) -> int:
     return 0
 
 
+
+def strip_section(text: str, header: str) -> str:
+    """Remove a '## header' section (up to the next '## ') from markdown text."""
+    lines = text.splitlines()
+    out: list[str] = []
+    skipping = False
+    for ln in lines:
+        if ln.startswith("## "):
+            skipping = ln.rstrip() == header
+        if not skipping:
+            out.append(ln)
+    return "\n".join(out) + "\n"
+
+
+def cmd_blind_pack(args) -> int:
+    """Bundle everything humans and the patient contributed; nothing a model concluded."""
+    parts: list[str] = []
+
+    def add(title: str, body: str) -> None:
+        parts.append(f"\n\n==================== {title} ====================\n\n{body}")
+
+    for name in ("profile/profile.md", "profile/medications.csv", "profile/specialists.csv",
+                 "data/labs_all.csv", "symptoms/log.csv"):
+        p = ROOT / name
+        if p.exists():
+            add(name, p.read_text(encoding="utf-8"))
+    dated: list[Path] = []
+    dated += list((ROOT / "data" / "labs").glob("*.md"))
+    dated += list((ROOT / "data" / "visits").glob("*.md"))
+    dated += list((ROOT / "data" / "other").glob("*.md"))
+    dated += list((ROOT / "symptoms").glob("*.md"))
+    for p in sorted(dated, key=lambda x: x.name):
+        text = p.read_text(encoding="utf-8")
+        text = strip_section(text, "## Harness notes")
+        add(rel(p), text)
+    if not parts:
+        print("blind-pack: record is empty")
+        return 1
+    out_dir = ROOT / "scratch"
+    out_dir.mkdir(exist_ok=True)
+    out = out_dir / f"blind_{today()}.md"
+    header = (f"# Blind pack, {today()}\n\nPrimary record only: profile, medications, specialists, "
+              "lab table, lab provenance notes, visits and other inputs with harness notes removed, "
+              "symptom log and journal. No summary, no diagnoses, no chats.\n")
+    out.write_text(header + "".join(parts), encoding="utf-8")
+    print(f"blind-pack: wrote {rel(out)} ({len(parts)} sections)")
+    return 0
+
+
 # --------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------
@@ -891,7 +941,7 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("commit", help="validate, stage and commit one operation")
     p.add_argument("--procedure", required=True,
-                   help="procedure name: onboarding, ingest, visit, adhoc, second-opinion, summary-refresh, correction, harness-update")
+                   help="procedure name: onboarding, ingest, visit, adhoc, second-opinion, summary-refresh, correction, migration, harness-update")
     p.add_argument("-m", "--message", required=True, help="one-line subject")
     p.add_argument("--all", action="store_true", help="stage every change outside harness-owned paths")
     p.add_argument("--harness-update", action="store_true", help="allow (only) harness-owned paths")
@@ -915,6 +965,9 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("symptoms", help="list symptom names with latest status")
     p.set_defaults(fn=cmd_symptoms)
+
+    p = sub.add_parser("blind-pack", help="write scratch/blind_<date>.md for a second opinion")
+    p.set_defaults(fn=cmd_blind_pack)
 
     args = ap.parse_args(argv)
     return args.fn(args)

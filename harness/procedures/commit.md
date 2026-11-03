@@ -55,7 +55,8 @@ python3 harness/scripts/msdh.py commit --procedure <name> -m "<subject>" <paths.
 ```
 
 - `<name>` is the procedure that did the work: `onboarding`, `ingest`,
-  `visit`, `adhoc`, `second-opinion`, `summary-refresh`, `correction`.
+  `visit`, `adhoc`, `second-opinion`, `summary-refresh`, `correction`,
+  `migration`.
 - `<subject>` is one line, under 70 characters, saying what, not how.
   Examples: `Quest CBC and metabolic panel 2026-11-02`, `cardiology
   follow-up with Dr Smith 2026-10-15`, `consultation on fatigue and

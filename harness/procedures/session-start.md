@@ -79,6 +79,10 @@ python3 harness/scripts/msdh.py check-remote
 
 ## 6. Load the patient
 
+**If the patient has asked for a second opinion, stop here** and go to
+`harness/procedures/second-opinion.md`. That procedure reads the record blind;
+loading the summary and hypotheses now would defeat it.
+
 Do not read the whole record. Read, in this order:
 
 1. `SUMMARY.md` — the working memory. If it is missing on an onboarded

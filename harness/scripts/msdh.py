@@ -45,7 +45,7 @@ SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 ASSESS_RE = re.compile(
     r"^### (\d{4}-\d{2}-\d{2}) \| (model|human|patient) \| (.+?) \| (.+)$"
 )
-FRONT_KEY_RE = re.compile(r"^([a-z_]+):\s*(.*)$")
+FRONT_KEY_RE = re.compile(r"^([a-z][a-z0-9_]*):\s*(.*)$")
 
 COMMON_REQUIRED = ("type", "title", "date", "created", "harness", "author_kind", "author", "source")
 AUTHOR_KINDS = ("model", "human", "patient")

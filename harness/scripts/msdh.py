@@ -81,6 +81,12 @@ DIAG_SECTIONS = ["## Summary", "## Evidence", "## What would settle it", "## Ass
 # --------------------------------------------------------------------------
 
 def find_root() -> Path:
+    env = os.environ.get("MSDH_ROOT")
+    if env:
+        r = Path(env).resolve()
+        if (r / "AGENTS.md").exists() and (r / "harness" / "VERSION").exists():
+            return r
+        sys.exit(f"msdh: MSDH_ROOT={env} is not a record root")
     here = Path(__file__).resolve()
     for p in [here] + list(here.parents):
         if (p / "AGENTS.md").exists() and (p / "harness" / "VERSION").exists():

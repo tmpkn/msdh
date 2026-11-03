@@ -19,8 +19,13 @@ patient for the harness repository URL and add it:
 ```
 git fetch upstream
 git log --oneline HEAD..upstream/master
-git diff HEAD..upstream/master -- harness/CHANGELOG.md
+git diff HEAD...upstream/master --stat
+git diff HEAD...upstream/master -- harness/CHANGELOG.md
 ```
+
+Three dots, not two: the three-dot form shows only what upstream added
+since the branches diverged. The two-dot form compares whole trees and
+lists every record file as a deletion, which is misleading.
 
 Tell the patient the current version (`harness/VERSION`), the new version,
 and what the changelog says changed, including any migration notes. Wait
@@ -29,8 +34,11 @@ for a yes.
 ## 3. Merge
 
 ```
-git merge --no-ff upstream/master -m "harness-update: <old> -> <new>"
+git merge --no-ff upstream/master -m "harness-update: <old> -> <new>" -m "Model: <model>" -m "Runtime: <runtime>"
 ```
+
+The merge is the one commit not made through `msdh.py commit`, so carry
+the provenance in the message yourself.
 
 By construction there are no conflicts: upstream touches only
 harness-owned paths, patient sessions never do. If git reports a conflict

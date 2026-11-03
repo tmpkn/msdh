@@ -5,6 +5,17 @@ Patient records carry the harness version in every file they write
 what changed and whether a record written under an older version needs
 migrating.
 
+## 1.1.1 — 2026-11-03
+
+From the first real harness-update and migration. No migration needed.
+
+- harness-update procedure uses three-dot diffs (two-dot listed every
+  record file as a deletion) and puts model and runtime in the merge
+  commit message.
+- Validator warns when a human assessment's author is not a name in
+  `profile/specialists.csv`, so one clinician is not spelled three ways
+  across a diag file.
+
 ## 1.1.0 — 2026-11-03
 
 Lessons from the first real onboarding (one patient, 58 documents, 63

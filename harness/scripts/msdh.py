@@ -505,6 +505,10 @@ def extra_diag(fm: dict, body: str, p: Path, rep: Report) -> None:
             if kind in ("human", "patient"):
                 if not (ROOT / tail.strip()).exists():
                     rep.err(r, f"assessment {d} by {author}: source path does not exist: {tail.strip()!r}")
+                if kind == "human" and KNOWN_CLINICIANS:
+                    bare = author.split(" (")[0].strip()
+                    if bare not in KNOWN_CLINICIANS:
+                        rep.warn(r, f"assessment {d}: author {bare!r} is not a name in profile/specialists.csv")
                 if kind == "patient" and author != "patient":
                     rep.err(r, f"assessment {d}: kind patient requires author 'patient'")
     if count == 0:

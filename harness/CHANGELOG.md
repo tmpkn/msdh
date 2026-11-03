@@ -5,6 +5,13 @@ Patient records carry the harness version in every file they write
 what changed and whether a record written under an older version needs
 migrating.
 
+## 1.2.2 — 2026-11-03
+
+- Fix: `msdh.py genetics summary` without `--file` crashed trying to read
+  the record's variants table as run metadata. It now reports the latest
+  genetics report's release, build and checksum instead. Found by the
+  record session after the 1.2.1 update.
+
 ## 1.2.1 — 2026-11-03
 
 From the first real ClinVar ingest. No migration needed.

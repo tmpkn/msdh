@@ -1099,8 +1099,15 @@ def cmd_genetics(args) -> int:
         acmg = sorted({r["gene"] for r in rows if r.get("acmg_sf")})
         acmg_p = sorted({r["gene"] for r in rows if r.get("acmg_sf") and r["tier"] == "pathogenic"})
         print(f"ACMG SF genes with any match: {len(acmg)}; with a pathogenic match: {', '.join(acmg_p) or 'none'}")
-        run = path.with_name(path.name.replace("_matches.csv", "_run.json"))
-        if run.exists():
+        run = path.with_name(path.name.replace("_matches.csv", "_run.json")) if path.name.endswith("_matches.csv") else None
+        if run is None:
+            reports = sorted((ROOT / "data" / "genetics").glob("*.md")) if (ROOT / "data" / "genetics").exists() else []
+            if reports:
+                fm, _, e = parse_frontmatter(reports[-1])
+                if fm and not e:
+                    print(f"latest report: {rel(reports[-1])}; ClinVar release {fm.get('clinvar_release')}; "
+                          f"build {fm.get('build')}; tool {fm.get('tool_version')}; vcf sha256 {fm.get('vcf_sha256', '')[:16]}")
+        if run is not None and run.exists():
             m = json.loads(run.read_text())
             g = m.get("genome", {})
             print(f"run: tool {m.get('tool_version')} at {m.get('run_at')}; build {m['vcf'].get('build')}; "

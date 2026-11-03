@@ -37,6 +37,9 @@ identity and checking the record. Then:
   answered with your full history in mind.
 - *"Give me a second opinion"* → run from a different model; it assesses the
   record blind and its view is recorded next to the others.
+- *"Ingest the ClinVar run"* → after you run `harness/tools/clinvar/analyze_wgs.py`
+  on your sequencing file by hand; matches are layered onto the record as
+  screening findings. See `harness/tools/clinvar/README.md`.
 
 Every change is committed with the model that made it stamped in the commit.
 `git log` is the audit trail.

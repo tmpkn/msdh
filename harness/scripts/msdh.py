@@ -49,7 +49,7 @@ FRONT_KEY_RE = re.compile(r"^([a-z_]+):\s*(.*)$")
 
 COMMON_REQUIRED = ("type", "title", "date", "created", "harness", "author_kind", "author", "source")
 AUTHOR_KINDS = ("model", "human", "patient")
-TYPES = ("profile", "summary", "lab", "visit", "other", "symptom", "diag", "chat")
+TYPES = ("profile", "summary", "lab", "visit", "other", "symptom", "diag", "chat", "genetics")
 VISIT_KINDS = ("consultation", "follow_up", "procedure", "emergency", "telehealth", "other")
 CHAT_KINDS = ("consultation", "review", "second_opinion", "onboarding")
 OTHER_SUBTYPES = ("imaging", "pathology", "genetics", "questionnaire", "device",
@@ -63,6 +63,11 @@ MEDS_COLUMNS = ["name", "dose", "route", "frequency", "start", "end", "prescribe
 SPECIALISTS_COLUMNS = ["name", "role", "institution", "since", "last_visit", "notes"]
 SYMPTOM_LOG_COLUMNS = ["date", "symptom", "severity", "duration", "status", "notes", "source"]
 OTHER_CSV_COLUMNS = ["date", "item", "value", "unit", "ref_low", "ref_high", "flag", "source", "notes"]
+GENETICS_COLUMNS = ["chrom", "pos", "ref", "alt", "gene", "rsid", "zygosity", "filter", "qual",
+                    "tier", "clinsig", "low_penetrance", "clnsigconf", "review_status", "stars",
+                    "conditions", "variation_id", "acmg_sf", "clinvar_url"]
+GENETICS_SECTIONS = ["## Summary", "## Changes since previous run", "## Pathogenic and likely pathogenic",
+                     "## Relevant to this patient", "## Transcription notes", "## Harness notes"]
 ROLE_RE = re.compile(r"^[a-z][a-z0-9 /_-]*$")
 KNOWN_CLINICIANS: set[str] = set()
 
@@ -454,6 +459,46 @@ def extra_symptom(fm: dict, body: str, p: Path, rep: Report) -> None:
     check_sections(body, p, rep, ["## Logged"])
 
 
+def extra_genetics(fm: dict, body: str, p: Path, rep: Report) -> None:
+    for k in ("clinvar_release", "build", "vcf_sha256", "tool_version"):
+        if not fm.get(k):
+            rep.err(rel(p), f"missing '{k}'")
+    if fm.get("clinvar_release") and not valid_date(fm["clinvar_release"]):
+        rep.err(rel(p), f"clinvar_release is not a date: {fm['clinvar_release']!r}")
+    if fm.get("build") not in (None, "GRCh37", "GRCh38"):
+        rep.err(rel(p), f"build must be GRCh37 or GRCh38, got {fm.get('build')!r}")
+    if fm.get("previous_report") and not (ROOT / fm["previous_report"]).exists():
+        rep.err(rel(p), f"previous_report does not exist: {fm['previous_report']!r}")
+    check_sections(body, p, rep, GENETICS_SECTIONS)
+
+
+def validate_genetics(rep: Report) -> None:
+    d = ROOT / "data" / "genetics"
+    if not d.exists():
+        return
+    reports = [p for p in d.glob("*.md")]
+    vcsv = d / "variants.csv"
+    if reports and not vcsv.exists():
+        rep.err("data/genetics/variants.csv", "missing; the genetics procedure copies the matches CSV here")
+    if vcsv.exists():
+        rows = check_csv_header(vcsv, rep, GENETICS_COLUMNS)
+        if rows is not None and not rows:
+            rep.warn(rel(vcsv), "no rows")
+    for p in d.iterdir():
+        if p.name in ("variants.csv", ".gitkeep"):
+            continue
+        if p.suffix != ".md":
+            rep.err(rel(p), "unexpected file in data/genetics/")
+            continue
+        check_filename(p, rep)
+        fm, body, e = parse_frontmatter(p)
+        if e:
+            rep.err(rel(p), e)
+            continue
+        check_common(fm, p, rep, "genetics", dated=True)
+        extra_genetics(fm, body, p, rep)
+
+
 def extra_chat(fm: dict, body: str, p: Path, rep: Report) -> None:
     if fm.get("visit_kind") not in CHAT_KINDS:
         rep.err(rel(p), f"visit_kind must be one of {CHAT_KINDS}, got {fm.get('visit_kind')!r}")
@@ -557,12 +602,12 @@ def validate_source(rep: Report) -> None:
 
 
 def validate_tree(rep: Report) -> None:
-    allowed_root = set(HARNESS_OWNED) | set(RECORD_DIRS) | {"SUMMARY.md", ".git", ".msdh", "scratch"}
+    allowed_root = set(HARNESS_OWNED) | set(RECORD_DIRS) | {"SUMMARY.md", ".git", ".msdh", "scratch", "dna"}
     for p in ROOT.iterdir():
         if p.name not in allowed_root:
             rep.err(p.name, "unexpected file or directory at record root")
     for p in (ROOT / "data").iterdir():
-        if p.name not in ("labs", "visits", "other", "labs_all.csv", "analytes_local.csv", ".gitkeep"):
+        if p.name not in ("labs", "visits", "other", "genetics", "labs_all.csv", "analytes_local.csv", ".gitkeep"):
             rep.err(rel(p), "unexpected file in data/")
 
 
@@ -578,6 +623,7 @@ def run_validation() -> Report:
     validate_md_dir(rep, ROOT / "data" / "other", "other", lambda fm, b, p: extra_other(fm, b, p, rep))
     validate_md_dir(rep, ROOT / "diags", "diag", lambda fm, b, p: extra_diag(fm, b, p, rep))
     validate_md_dir(rep, ROOT / "chats", "chat", lambda fm, b, p: extra_chat(fm, b, p, rep))
+    validate_genetics(rep)
     # symptoms: journal entries plus log.csv
     sd = ROOT / "symptoms"
     for p in sd.iterdir():
@@ -931,7 +977,7 @@ def cmd_blind_pack(args) -> int:
         parts.append(f"\n\n==================== {title} ====================\n\n{body}")
 
     for name in ("profile/profile.md", "profile/medications.csv", "profile/specialists.csv",
-                 "data/labs_all.csv", "symptoms/log.csv"):
+                 "data/labs_all.csv", "symptoms/log.csv", "data/genetics/variants.csv"):
         p = ROOT / name
         if p.exists():
             add(name, p.read_text(encoding="utf-8"))
@@ -940,9 +986,11 @@ def cmd_blind_pack(args) -> int:
     dated += list((ROOT / "data" / "visits").glob("*.md"))
     dated += list((ROOT / "data" / "other").glob("*.md"))
     dated += list((ROOT / "symptoms").glob("*.md"))
+    dated += list((ROOT / "data" / "genetics").glob("*.md")) if (ROOT / "data" / "genetics").exists() else []
     for p in sorted(dated, key=lambda x: x.name):
         text = p.read_text(encoding="utf-8")
         text = strip_section(text, "## Harness notes")
+        text = strip_section(text, "## Relevant to this patient")
         add(rel(p), text)
     if not parts:
         print("blind-pack: record is empty")

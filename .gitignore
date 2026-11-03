@@ -2,6 +2,9 @@
 .msdh/
 # scratch space for agents; never part of the record
 scratch/
+# symlink to sequencing data kept outside the record; see harness/tools/clinvar/README.md
+dna
+dna/
 __pycache__/
 *.pyc
 .DS_Store

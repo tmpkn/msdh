@@ -56,6 +56,8 @@ procedure you were in the middle of. The summary is not the procedure.
 | `data/labs_all.csv` | Derived master table of every lab value ever recorded | script, regenerated |
 | `data/visits/` | Processed specialist visit notes | ingest |
 | `data/other/` | Processed inputs that are neither labs nor visits (imaging reports, questionnaires) | ingest |
+| `data/genetics/` | ClinVar matches for the patient's genome: current table plus one report per run | genetics |
+| `dna/` | Gitignored symlink to sequencing files kept outside the record; never read directly by procedures | patient |
 | `symptoms/` | Dated symptom journal entries plus `symptoms/log.csv` | visit, ad-hoc |
 | `diags/` | One file per hypothesis or diagnosis, multi-voiced, with status | visit, second-opinion |
 | `chats/` | Dated summaries of meaningful consultations with the patient | visit |
@@ -70,6 +72,7 @@ Read the procedure file in full before performing it.
 | Set up a new record, introduce themselves | `harness/procedures/onboarding.md` |
 | Commit work to the record | `harness/procedures/commit.md` |
 | Add a lab result, doctor letter, scan report | `harness/procedures/ingest.md` |
+| Bring in a ClinVar run on their genome | `harness/procedures/genetics.md` |
 | Have a proper consultation, discuss how they are doing | `harness/procedures/visit.md` |
 | Ask a quick question | `harness/procedures/adhoc.md` |
 | Get an independent second opinion from another model | `harness/procedures/second-opinion.md` |

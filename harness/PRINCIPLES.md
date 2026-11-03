@@ -99,6 +99,9 @@ Guarantees that make this conflict-free:
   without script access can still read it.
 - **`source/` is immutable.** Processed files point back to their source by
   path.
+- **Bulk data stays outside.** Sequencing files live behind a gitignored
+  `dna/` symlink. Only derived, dated outputs enter `source/`, produced by
+  tools the patient runs by hand outside the agent.
 - **`SUMMARY.md` is the physician's working memory.** Roughly one page:
   problem list, active medications, open hypotheses, pending tests, recent
   changes. It is what gets loaded for every ad-hoc question, and it is

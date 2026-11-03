@@ -5,6 +5,25 @@ Patient records carry the harness version in every file they write
 what changed and whether a record written under an older version needs
 migrating.
 
+## 1.2.0 — 2026-11-03
+
+Genetics. No migration needed.
+
+- `harness/tools/clinvar/analyze_wgs.py`: standard-library rewrite of the
+  ClinVar matching tool, run by hand outside the agent. Matches on
+  normalised alleles, reports only carried alleles, classifies significance
+  by token with review stars, records release and checksums, diffs against
+  the previous run, supports gene include and exclude lists, flags ACMG
+  secondary-findings genes. Outputs land in `source/` dated by ClinVar
+  release.
+- New record directory `data/genetics/` with `variants.csv` (current
+  matches) and one report per run; schema in `schemas/genetics.md`,
+  validated. New procedure `genetics.md`, which requires a genetic findings
+  policy in the profile before the first ingest.
+- `dna/` is an allowed, gitignored symlink at the record root.
+- Blind pack includes the variants table and the reports with reasoning
+  sections stripped.
+
 ## 1.1.1 — 2026-11-03
 
 From the first real harness-update and migration. No migration needed.

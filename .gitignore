@@ -1,0 +1,7 @@
+# local session state written by harness/scripts/msdh.py session; never committed
+.msdh/
+# scratch space for agents; never part of the record
+scratch/
+__pycache__/
+*.pyc
+.DS_Store

@@ -1,0 +1,118 @@
+analyte,aliases,category
+hemoglobin,hgb|hb|haemoglobin,hematology
+hematocrit,hct|haematocrit|pcv,hematology
+rbc,red blood cells|red cell count|erythrocytes,hematology
+wbc,white blood cells|white cell count|leukocytes|leucocytes,hematology
+platelets,plt|platelet count|thrombocytes,hematology
+mcv,mean corpuscular volume|mean cell volume,hematology
+mch,mean corpuscular hemoglobin|mean cell haemoglobin,hematology
+mchc,mean corpuscular hemoglobin concentration,hematology
+rdw,red cell distribution width|rdw-cv,hematology
+mpv,mean platelet volume,hematology
+neutrophils,neut|neutrophil count|absolute neutrophils,hematology
+lymphocytes,lymph|lymphocyte count|absolute lymphocytes,hematology
+monocytes,mono|monocyte count,hematology
+eosinophils,eos|eosinophil count,hematology
+basophils,baso|basophil count,hematology
+neutrophils_pct,neutrophils %|neut %,hematology
+lymphocytes_pct,lymphocytes %|lymph %,hematology
+monocytes_pct,monocytes %|mono %,hematology
+eosinophils_pct,eosinophils %|eos %,hematology
+basophils_pct,basophils %|baso %,hematology
+reticulocytes,retic|reticulocyte count,hematology
+esr,erythrocyte sedimentation rate|sed rate,inflammation
+crp,c-reactive protein|c reactive protein,inflammation
+hs_crp,high sensitivity crp|hscrp|cardio crp,inflammation
+ferritin,,iron
+iron,serum iron|fe,iron
+tibc,total iron binding capacity,iron
+transferrin,,iron
+transferrin_saturation,tsat|iron saturation|transferrin sat,iron
+vitamin_b12,b12|cobalamin,vitamins
+folate,folic acid|serum folate,vitamins
+vitamin_d_25oh,25-oh vitamin d|25-hydroxyvitamin d|vitamin d|vit d,vitamins
+glucose,fasting glucose|blood glucose|plasma glucose,metabolic
+hba1c,a1c|glycated hemoglobin|glycated haemoglobin|hemoglobin a1c,metabolic
+insulin,fasting insulin,metabolic
+sodium,na,electrolytes
+potassium,k,electrolytes
+chloride,cl,electrolytes
+bicarbonate,hco3|co2|total co2,electrolytes
+calcium,ca|total calcium,electrolytes
+calcium_ionized,ionized calcium|ionised calcium,electrolytes
+magnesium,mg,electrolytes
+phosphate,phosphorus|po4,electrolytes
+urea,bun|blood urea nitrogen,renal
+creatinine,creat|cr,renal
+egfr,estimated gfr|gfr,renal
+uric_acid,urate,renal
+cystatin_c,,renal
+albumin,alb|serum albumin,liver
+total_protein,protein total,liver
+globulin,,liver
+alt,alanine aminotransferase|sgpt,liver
+ast,aspartate aminotransferase|sgot,liver
+alp,alkaline phosphatase,liver
+ggt,gamma gt|gamma-glutamyl transferase,liver
+bilirubin_total,total bilirubin|bilirubin,liver
+bilirubin_direct,direct bilirubin|conjugated bilirubin,liver
+ldh,lactate dehydrogenase,liver
+total_cholesterol,cholesterol|chol,lipids
+ldl,ldl cholesterol|ldl-c,lipids
+hdl,hdl cholesterol|hdl-c,lipids
+non_hdl,non-hdl cholesterol,lipids
+triglycerides,tg|trig,lipids
+apob,apolipoprotein b,lipids
+lipoprotein_a,lp(a)|lpa,lipids
+tsh,thyroid stimulating hormone|thyrotropin,thyroid
+free_t4,ft4|free thyroxine,thyroid
+free_t3,ft3|free triiodothyronine,thyroid
+total_t4,t4|thyroxine,thyroid
+total_t3,t3,thyroid
+tpo_antibodies,anti-tpo|thyroid peroxidase antibodies|tpoab,thyroid
+thyroglobulin_antibodies,anti-tg|tgab,thyroid
+cortisol,serum cortisol|am cortisol,endocrine
+acth,adrenocorticotropic hormone,endocrine
+testosterone_total,testosterone|total testosterone,endocrine
+testosterone_free,free testosterone,endocrine
+shbg,sex hormone binding globulin,endocrine
+estradiol,e2|oestradiol,endocrine
+progesterone,,endocrine
+fsh,follicle stimulating hormone,endocrine
+lh,luteinizing hormone|luteinising hormone,endocrine
+prolactin,,endocrine
+dhea_s,dhea sulfate|dhea-s|dheas,endocrine
+pth,parathyroid hormone|intact pth,endocrine
+igf1,igf-1|insulin-like growth factor 1,endocrine
+troponin,troponin t|troponin i|hs troponin,cardiac
+nt_probnp,nt-probnp|pro-bnp,cardiac
+bnp,b-type natriuretic peptide,cardiac
+ck,creatine kinase|cpk,muscle
+amylase,,pancreas
+lipase,,pancreas
+ana,antinuclear antibodies|antinuclear antibody,autoimmune
+rheumatoid_factor,rf,autoimmune
+anti_ccp,ccp antibodies|anti-cyclic citrullinated peptide,autoimmune
+tissue_transglutaminase_iga,ttg-iga|ttg iga|anti-ttg,autoimmune
+total_iga,iga|immunoglobulin a,immunology
+igg,immunoglobulin g,immunology
+igm,immunoglobulin m,immunology
+ige,immunoglobulin e|total ige,immunology
+psa,prostate specific antigen|total psa,tumor_markers
+inr,international normalized ratio,coagulation
+pt,prothrombin time,coagulation
+aptt,activated partial thromboplastin time|ptt,coagulation
+fibrinogen,,coagulation
+d_dimer,d-dimer,coagulation
+homocysteine,,metabolic
+lactate,lactic acid,metabolic
+ammonia,,metabolic
+urine_protein,protein urine|urinary protein,urinalysis
+urine_albumin_creatinine_ratio,acr|uacr|albumin/creatinine ratio,urinalysis
+urine_glucose,glucose urine,urinalysis
+urine_ketones,ketones urine,urinalysis
+urine_blood,blood urine|hematuria dipstick,urinalysis
+urine_leukocytes,leukocyte esterase|leukocytes urine,urinalysis
+urine_nitrite,nitrite urine,urinalysis
+urine_ph,ph urine,urinalysis
+urine_specific_gravity,specific gravity|sg,urinalysis

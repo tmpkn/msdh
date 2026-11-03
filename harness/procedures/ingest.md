@@ -19,6 +19,18 @@ batch.
 - **Pasted text.** Save it verbatim to `source/YYYY-MM-DD_slug.txt`. Do not
   tidy it.
 - **A file already in `source/`.** Use it in place.
+- **An archive or a batch of files.** Extract to `scratch/` (never into the
+  record), then:
+
+  ```
+  python3 harness/scripts/msdh.py dedupe scratch/<dir>
+  ```
+
+  Byte-identical duplicates of anything in `source/` are reported and
+  skipped. A re-download of the same report has different bytes, so also
+  compare date, lab and panel against what is already in `data/` before
+  treating a file as new. Then ingest the remainder one document at a time,
+  oldest first, each as its own commit.
 - **A photo or scan you cannot read.** Say so. Ask the patient to paste or
   dictate the values. Save what they give you as a `.txt` beside the image
   and treat the text as the source, noting in transcription notes that the
@@ -27,6 +39,11 @@ batch.
 `source/` files are never modified after this step.
 
 ## 2. Read it in full
+
+Reading PDFs: use `pdftotext -layout` when it is installed, which it usually
+is; a page with no text layer (a scan) can be rendered with `pdftoppm` and
+read as an image if your runtime reads images; otherwise ask the patient to
+paste or dictate. Say in transcription notes which path you took.
 
 Read every page. Lab reports often have several pages and a comments
 section at the end. Letters have the plan at the bottom. Do not transcribe
@@ -54,9 +71,12 @@ Read the schema file before writing. Dates, your identity and the harness
 version go in the frontmatter as session-start established them.
 
 **Labs.** One row per analyte. Canonical names from
-`harness/schemas/analytes.csv`; look up aliases, do not invent spellings. If
-an analyte is not in the list, use a clear lowercase name and say so under
-transcription notes. Values exactly as printed, units exactly as printed,
+`harness/schemas/analytes.csv` and `data/analytes_local.csv`; look up
+aliases, do not invent spellings. If an analyte is in neither, coin a name
+following the conventions in the labs schema and add it to
+`data/analytes_local.csv` in the same commit. Large one-off profiles (food
+IgG panels, stool PCR panels, neurotransmitter profiles) are not lab panels;
+they go to `data/other/` with a CSV sidecar, per the labs schema. Values exactly as printed, units exactly as printed,
 no conversions, flags as printed. Write the sibling `.md` with the lab name,
 ordering clinician if shown, and every comment the report carries. Then:
 

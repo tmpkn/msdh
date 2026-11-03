@@ -22,7 +22,11 @@ date,symptom,severity,duration,status,notes,source
 | `notes` | Character, triggers, timing, what helps |
 | `source` | Repo path of the chat, journal entry or visit where it was reported |
 
-`msdh.py symptoms` lists distinct symptom names so that agents reuse them.
+`msdh.py symptoms` lists distinct symptom names with their latest status so
+that agents reuse them. By default it hides names not reported in the last
+year; `--all` shows everything. Checklist items transcribed from old
+questionnaires are legitimate rows (dated and sourced to the document) but
+they are history, not the current picture.
 
 ## `symptoms/YYYY-MM-DD_slug.md`
 

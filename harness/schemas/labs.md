@@ -64,7 +64,35 @@ date,analyte,value,unit,ref_low,ref_high,flag,lab,source,file,notes
 Same columns as the per-source files plus `file`, the per-source CSV path.
 Sorted by `analyte`, then `date`.
 
-## `harness/schemas/analytes.csv`
+## What belongs in `data/labs/`
+
+Analytes that recur and are worth trending: blood and urine chemistry,
+hematology, hormones, antibodies, microbiology results, timed urine
+collections, saliva hormones, and the few trendable values from stool
+panels (calprotectin, elastase, occult blood, H. pylori).
+
+Large one-off profiles do **not** go here: IgG food sensitivity panels,
+stool microbiome PCR panels, urinary neurotransmitter profiles, genetic
+panels. They are hundreds of items that will never be trended as analytes
+and they drown the lab table. They go to `data/other/` with a CSV sidecar
+(see `other.md`). A handful of clinically meaningful values from such a
+report may additionally be entered as lab rows, pointing at the same
+source.
+
+## Analyte naming
+
+Canonical names are lowercase, words joined by underscores. Conventions:
+
+- specimen prefix when not blood: `urine_`, `saliva_`, `stool_`, `csf_`;
+  blood is the default and carries no prefix;
+- `_24h` for timed collections, `_random` for spot urine;
+- `_cr` for values normalised to creatinine;
+- `_pct` for percentages, `_absolute` where a count has a percentage twin;
+- `_supine` and `_upright`, `_morning`, `_noon`, `_evening`, `_night` for
+  posture- or time-specific draws;
+- antibodies as `<target>_antibody` or `<target>_igg`, `_igm`, `_iga`.
+
+## `harness/schemas/analytes.csv` and `data/analytes_local.csv`
 
 Canonical analyte names with aliases, so that trends can be followed across
 laboratories that name things differently.
@@ -74,6 +102,11 @@ analyte,aliases,category
 ```
 
 `aliases` is `|`-separated. Matching is case-insensitive on both the canonical
-name and the aliases. The validator warns, but does not fail, on an analyte
-that is not in this list. Additions to the list are made upstream in the
-harness; if an analyte is missing, use a clear lowercase name and note it.
+name and the aliases.
+
+The harness list is upstream and grows with releases. A record may extend
+it with `data/analytes_local.csv`, same columns, for names coined during
+ingest that the harness does not know yet. Add the row in the same commit
+as the lab file that introduces the name. The validator honours both files
+and warns once per name that is in neither. When a later harness release
+adopts a local name under a different spelling, the migration notes say so.

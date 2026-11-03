@@ -11,6 +11,7 @@ Commands:
   labs         rebuild data/labs_all.csv, or show a trend for one analyte
   symptoms     list distinct symptom names in symptoms/log.csv
   blind-pack   write scratch/blind_<date>.md: the record without any model reasoning
+  dedupe       check incoming files against source/ by checksum before an ingest
 
 Run from anywhere inside the record; the repository root is located
 automatically.
@@ -61,6 +62,9 @@ LABS_ALL_COLUMNS = LABS_COLUMNS[:-1] + ["file", "notes"]
 MEDS_COLUMNS = ["name", "dose", "route", "frequency", "start", "end", "prescriber", "reason", "source", "notes"]
 SPECIALISTS_COLUMNS = ["name", "role", "institution", "since", "last_visit", "notes"]
 SYMPTOM_LOG_COLUMNS = ["date", "symptom", "severity", "duration", "status", "notes", "source"]
+OTHER_CSV_COLUMNS = ["date", "item", "value", "unit", "ref_low", "ref_high", "flag", "source", "notes"]
+ROLE_RE = re.compile(r"^[a-z][a-z0-9 /_-]*$")
+KNOWN_CLINICIANS: set[str] = set()
 
 PROFILE_SECTIONS = ["## Identity", "## Allergies and intolerances", "## Past medical history",
                     "## Surgeries and procedures", "## Family history", "## Lifestyle",
@@ -172,17 +176,19 @@ def read_csv(path: Path) -> tuple[list[str], list[dict]]:
 def load_analytes() -> dict[str, str]:
     """alias (lowercase) -> canonical name."""
     out: dict[str, str] = {}
-    p = ROOT / "harness" / "schemas" / "analytes.csv"
-    if not p.exists():
-        return out
-    _, rows = read_csv(p)
-    for r in rows:
-        canon = r["analyte"].strip().lower()
-        out[canon] = canon
-        for a in (r.get("aliases") or "").split("|"):
-            a = a.strip().lower()
-            if a:
-                out[a] = canon
+    for p in (ROOT / "harness" / "schemas" / "analytes.csv", ROOT / "data" / "analytes_local.csv"):
+        if not p.exists():
+            continue
+        _, rows = read_csv(p)
+        for r in rows:
+            canon = (r.get("analyte") or "").strip().lower()
+            if not canon:
+                continue
+            out.setdefault(canon, canon)
+            for a in (r.get("aliases") or "").split("|"):
+                a = a.strip().lower()
+                if a:
+                    out.setdefault(a, canon)
     return out
 
 
@@ -295,6 +301,11 @@ def validate_profile(rep: Report) -> bool:
                     rep.err(rel(p), f"row {i}: '{col}' is not a date: {row[col]!r}")
             if "name" in row and not row["name"].strip():
                 rep.err(rel(p), f"row {i}: empty name")
+            if name == "specialists.csv":
+                KNOWN_CLINICIANS.add(row["name"].strip())
+                if not ROLE_RE.match(row.get("role") or ""):
+                    rep.err(rel(p), f"row {i}: role must be a plain lowercase specialty "
+                                    f"(qualifiers go in notes), got {row.get('role')!r}")
     for p in d.iterdir():
         if p.name not in ("profile.md", "medications.csv", "specialists.csv", ".gitkeep"):
             rep.err(rel(p), "unexpected file in profile/")
@@ -320,6 +331,7 @@ def validate_summary(rep: Report, onboarded: bool) -> None:
 def validate_labs(rep: Report, analytes: dict[str, str]) -> list[dict]:
     d = ROOT / "data" / "labs"
     all_rows: list[dict] = []
+    unknown: dict[str, list[str]] = {}
     csvs = sorted(d.glob("*.csv"))
     mds = {p.stem: p for p in md_files(d)}
     for c in csvs:
@@ -349,7 +361,7 @@ def validate_labs(rep: Report, analytes: dict[str, str]) -> list[dict]:
             elif row["analyte"] != row["analyte"].strip().lower():
                 rep.err(rel(c), f"row {i}: analyte must be lowercase canonical name: {row['analyte']!r}")
             elif analytes and row["analyte"] not in analytes:
-                rep.warn(rel(c), f"row {i}: analyte {row['analyte']!r} not in harness/schemas/analytes.csv")
+                unknown.setdefault(row["analyte"], []).append(rel(c))
             elif analytes.get(row["analyte"]) != row["analyte"]:
                 rep.err(rel(c), f"row {i}: {row['analyte']!r} is an alias; use canonical {analytes[row['analyte']]!r}")
             if row["value"].strip() == "":
@@ -363,6 +375,9 @@ def validate_labs(rep: Report, analytes: dict[str, str]) -> list[dict]:
             r2 = dict(row)
             r2["file"] = rel(c)
             all_rows.append(r2)
+    for name, files in sorted(unknown.items()):
+        rep.warn("data/labs", f"analyte {name!r} not in harness/schemas/analytes.csv or "
+                              f"data/analytes_local.csv ({len(files)} row(s), first in {files[0]})")
     for stem, p in mds.items():
         rep.err(rel(p), f"provenance file without a sibling {stem}.csv")
     for p in d.iterdir():
@@ -398,6 +413,7 @@ def validate_md_dir(rep: Report, d: Path, expect_type: str, extra) -> None:
             continue
         if p.suffix != ".md":
             if expect_type == "other" and p.suffix == ".csv" and (d / (p.stem + ".md")).exists():
+                check_csv_header(p, rep, OTHER_CSV_COLUMNS)
                 continue
             rep.err(rel(p), f"unexpected file in {rel(d)}/")
             continue
@@ -416,6 +432,8 @@ def extra_visit(fm: dict, body: str, p: Path, rep: Report) -> None:
             rep.err(rel(p), f"missing '{k}'")
     if fm.get("visit_kind") and fm["visit_kind"] not in VISIT_KINDS:
         rep.err(rel(p), f"visit_kind must be one of {VISIT_KINDS}")
+    if KNOWN_CLINICIANS and fm.get("clinician") and fm["clinician"] not in KNOWN_CLINICIANS:
+        rep.warn(rel(p), f"clinician {fm['clinician']!r} is not a name in profile/specialists.csv")
     check_sections(body, p, rep, ["## Reason for visit", "## Clinician's findings",
                                   "## Clinician's assessment", "## Plan"])
 
@@ -446,6 +464,9 @@ def extra_diag(fm: dict, body: str, p: Path, rep: Report) -> None:
             rep.err(r, f"missing '{k}'")
     if fm.get("status_date") and not valid_date(fm["status_date"]):
         rep.err(r, f"status_date is not a date: {fm['status_date']!r}")
+    sb = fm.get("status_by", "")
+    if KNOWN_CLINICIANS and " " in sb and sb not in KNOWN_CLINICIANS:
+        rep.warn(r, f"status_by {sb!r} is not a name in profile/specialists.csv")
     if st == "superseded":
         sb = fm.get("superseded_by", "")
         if not sb or not (ROOT / sb).exists():
@@ -472,7 +493,8 @@ def extra_diag(fm: dict, body: str, p: Path, rep: Report) -> None:
             if not valid_date(d):
                 rep.err(r, f"assessment date invalid: {d}")
             elif d < last_date:
-                rep.err(r, f"assessments must be in chronological order; {d} comes after {last_date}")
+                rep.warn(r, f"assessment dated {d} appears after one dated {last_date}; "
+                            "keep the true date and insert in date order when practical")
             last_date = max(last_date, d)
             if kind in ("human", "patient"):
                 if not (ROOT / tail.strip()).exists():
@@ -530,7 +552,7 @@ def validate_tree(rep: Report) -> None:
         if p.name not in allowed_root:
             rep.err(p.name, "unexpected file or directory at record root")
     for p in (ROOT / "data").iterdir():
-        if p.name not in ("labs", "visits", "other", "labs_all.csv", ".gitkeep"):
+        if p.name not in ("labs", "visits", "other", "labs_all.csv", "analytes_local.csv", ".gitkeep"):
             rep.err(rel(p), "unexpected file in data/")
 
 
@@ -857,12 +879,23 @@ def cmd_symptoms(args) -> int:
         return 0
     _, rows = read_csv(p)
     latest: dict[str, dict] = {}
+    counts: dict[str, int] = {}
     for r in rows:
+        counts[r["symptom"]] = counts.get(r["symptom"], 0) + 1
         if r["symptom"] not in latest or r["date"] >= latest[r["symptom"]]["date"]:
             latest[r["symptom"]] = r
-    for name in sorted(latest):
+    cutoff = (dt.date.today() - dt.timedelta(days=args.days)).isoformat()
+    hidden = 0
+    print(f"{'symptom':<28}{'status':<12}{'last':<12}{'sev':<5}{'reports':<8}age")
+    for name in sorted(latest, key=lambda n: latest[n]["date"], reverse=True):
         r = latest[name]
-        print(f"{name:<28}{r['status']:<12}last {r['date']}  sev {r['severity'] or '-'}")
+        if r["date"] < cutoff and not args.all:
+            hidden += 1
+            continue
+        age = (dt.date.today() - dt.date.fromisoformat(r["date"])).days if valid_date(r["date"]) else -1
+        print(f"{name:<28}{r['status']:<12}{r['date']:<12}{(r['severity'] or '-'):<5}{counts[name]:<8}{age}d")
+    if hidden:
+        print(f"({hidden} symptom(s) last reported more than {args.days} days ago hidden; --all shows them)")
     return 0
 
 
@@ -915,6 +948,52 @@ def cmd_blind_pack(args) -> int:
     return 0
 
 
+
+def cmd_dedupe(args) -> int:
+    """Compare incoming files against source/ by SHA-256; directories are walked."""
+    import hashlib
+
+    def sha(p: Path) -> str:
+        h = hashlib.sha256()
+        with p.open("rb") as f:
+            for chunk in iter(lambda: f.read(1 << 20), b""):
+                h.update(chunk)
+        return h.hexdigest()
+
+    existing: dict[str, str] = {}
+    for p in (ROOT / "source").iterdir():
+        if p.is_file() and p.name != ".gitkeep":
+            existing[sha(p)] = rel(p)
+    incoming: list[Path] = []
+    for a in args.paths:
+        p = Path(a)
+        if p.is_dir():
+            incoming += [q for q in sorted(p.rglob("*")) if q.is_file()]
+        elif p.is_file():
+            incoming.append(p)
+        else:
+            print(f"dedupe: not found: {a}")
+    seen: dict[str, Path] = {}
+    new = dup = 0
+    for p in incoming:
+        if p.name.startswith("._") or p.name == ".DS_Store":
+            continue
+        h = sha(p)
+        if h in existing:
+            print(f"DUP   {p}  == {existing[h]}")
+            dup += 1
+        elif h in seen:
+            print(f"DUP   {p}  == {seen[h]} (within this batch)")
+            dup += 1
+        else:
+            print(f"NEW   {p}")
+            seen[h] = p
+            new += 1
+    print(f"dedupe: {new} new, {dup} duplicate(s). Byte-identical only; a re-export of the same "
+          "report has different bytes, so also compare date, lab and panel against data/.")
+    return 0
+
+
 # --------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------
@@ -964,7 +1043,13 @@ def main(argv: list[str] | None = None) -> int:
     p.set_defaults(fn=cmd_labs)
 
     p = sub.add_parser("symptoms", help="list symptom names with latest status")
+    p.add_argument("--all", action="store_true", help="include symptoms not reported recently")
+    p.add_argument("--days", type=int, default=365, help="recency window in days (default 365)")
     p.set_defaults(fn=cmd_symptoms)
+
+    p = sub.add_parser("dedupe", help="check incoming files against source/ by checksum")
+    p.add_argument("paths", nargs="+", help="files or directories to check")
+    p.set_defaults(fn=cmd_dedupe)
 
     p = sub.add_parser("blind-pack", help="write scratch/blind_<date>.md for a second opinion")
     p.set_defaults(fn=cmd_blind_pack)

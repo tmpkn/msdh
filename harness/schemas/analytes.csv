@@ -116,3 +116,130 @@ urine_leukocytes,leukocyte esterase|leukocytes urine,urinalysis
 urine_nitrite,nitrite urine,urinalysis
 urine_ph,ph urine,urinalysis
 urine_specific_gravity,specific gravity|sg,urinalysis
+vitamin_b7,biotin,vitamins
+vitamin_a,retinol,vitamins
+vitamin_b1,thiamine,vitamins
+vitamin_b2,riboflavin,vitamins
+vitamin_b5,pantothenic acid,vitamins
+vitamin_b6,pyridoxine|pyridoxal 5-phosphate,vitamins
+vitamin_d_1_25_total,"1,25-dihydroxyvitamin d|calcitriol",vitamins
+vitamin_k,phylloquinone,vitamins
+methylmalonic_acid,mma,vitamins
+zinc,zn|serum zinc,minerals
+copper,cu|serum copper,minerals
+selenium,,minerals
+ceruloplasmin,,minerals
+uibc,unsaturated iron binding capacity,iron
+bun_creatinine_ratio,bun/creatinine ratio,renal
+egfr_african_american,egfr aa,renal
+albumin_globulin_ratio,a/g ratio,liver
+cholesterol_hdl_ratio,chol/hdl ratio|total cholesterol/hdl,lipids
+vldl,vldl cholesterol,lipids
+reticulocytes_absolute,absolute reticulocytes|retic absolute,hematology
+reticulocytes_pct,reticulocyte %|retic %,hematology
+immature_granulocytes,ig absolute,hematology
+immature_granulocytes_pct,ig %,hematology
+nucleated_rbc,nrbc,hematology
+rdw_sd,,hematology
+erythropoietin,epo,hematology
+haptoglobin,,hematology
+sickle_cell_screen,hemoglobin s screen,hematology
+kappa_light_chain,free kappa|kappa free light chain,immunology
+lambda_light_chain,free lambda|lambda free light chain,immunology
+kappa_lambda_ratio,kappa/lambda ratio|free light chain ratio,immunology
+immunofixation_serum,ife,immunology
+spep_interpretation,protein electrophoresis interpretation,immunology
+alpha_1_globulin,alpha-1 globulin,immunology
+alpha_2_globulin,alpha-2 globulin,immunology
+beta_1_globulin,beta-1 globulin,immunology
+beta_2_globulin,beta-2 globulin,immunology
+gamma_globulin,,immunology
+reverse_t3,rt3,thyroid
+t3_uptake,thyroid uptake|t3u,thyroid
+free_thyroxine_index,fti,thyroid
+prolactin_monomeric,monomeric prolactin,endocrine
+macroprolactin_pct,macroprolactin %,endocrine
+igf1_z_score,igf-1 z score,endocrine
+17_oh_progesterone,17-hydroxyprogesterone|17-ohp,endocrine
+estrogens_total,total estrogens,endocrine
+hcg,beta hcg|hcg quantitative|pregnancy test serum,endocrine
+amh,anti-mullerian hormone,endocrine
+osmolality_serum,serum osmolality,metabolic
+osmolality_urine,urine osmolality,urinalysis
+intrinsic_factor_blocking_antibody,intrinsic factor antibody|ifab,autoimmune
+parietal_cell_antibody,anti-parietal cell|apca,autoimmune
+gastrin,,gastro
+pepsinogen_1,pepsinogen i,gastro
+pepsinogen_2,pepsinogen ii,gastro
+h_pylori_stool_antigen,helicobacter pylori stool antigen,infectious
+h_pylori_igg,helicobacter pylori igg,infectious
+hepatitis_b_surface_antigen,hbsag,infectious
+hepatitis_b_surface_antibody,hbsab|anti-hbs,infectious
+hepatitis_b_core_antibody,hbcab|anti-hbc,infectious
+hepatitis_c_antibody,hcv antibody|anti-hcv,infectious
+hiv_antigen_antibody,hiv 1/2 ag/ab|hiv 4th generation,infectious
+syphilis_screen,rpr|treponema antibody,infectious
+gonorrhea_naa,neisseria gonorrhoeae naa|gc naa,infectious
+chlamydia_naa,chlamydia trachomatis naa,infectious
+trichomonas_naa,trichomonas vaginalis naa|trichomonas rna,infectious
+rubella_igg,rubella immunity,infectious
+ebv_vca_igm,,infectious
+ebv_vca_igg,,infectious
+ebv_ebna_igg,,infectious
+lyme_igg_blot,lyme western blot igg,infectious
+lyme_igm_blot,lyme western blot igm,infectious
+sars_cov_2_rna,covid pcr|sars-cov-2 pcr,infectious
+sars_cov_2_antigen,covid antigen,infectious
+influenza_a,influenza a pcr|flu a,infectious
+influenza_b,influenza b pcr|flu b,infectious
+strep_a_antigen_rapid,rapid strep|strep a rapid,infectious
+throat_culture,,infectious
+urine_culture,,infectious
+urine_color,,urinalysis
+urine_appearance,urine clarity,urinalysis
+urine_bilirubin,bilirubin urine,urinalysis
+urine_urobilinogen,urobilinogen urine,urinalysis
+urine_wbc,wbc urine|leukocytes microscopy,urinalysis
+urine_rbc,rbc urine|erythrocytes microscopy,urinalysis
+urine_bacteria,bacteria urine,urinalysis
+urine_mucus,mucus urine,urinalysis
+urine_epithelial_cells,epithelial cells urine,urinalysis
+urine_sodium_random,random urine sodium,urinalysis
+urine_creatinine_random,random urine creatinine,urinalysis
+urine_sodium_creatinine_ratio,,urinalysis
+urine_volume_24h,24 hour urine volume,urine_24h
+urine_creatinine_24h,24 hour urine creatinine,urine_24h
+urine_cortisol_free_24h,24 hour urinary free cortisol|ufc,urine_24h
+urine_metanephrine_24h,24 hour urine metanephrine,urine_24h
+urine_normetanephrine_24h,24 hour urine normetanephrine,urine_24h
+urine_metanephrines_total_24h,24 hour urine total metanephrines,urine_24h
+urine_vma_24h,24 hour urine vma|vanillylmandelic acid,urine_24h
+urine_epinephrine_24h,24 hour urine epinephrine,urine_24h
+urine_norepinephrine_24h,24 hour urine norepinephrine,urine_24h
+urine_dopamine_24h,24 hour urine dopamine,urine_24h
+urine_5_hiaa_24h,24 hour urine 5-hiaa,urine_24h
+epinephrine_plasma_supine,,catecholamines
+epinephrine_plasma_upright,,catecholamines
+norepinephrine_plasma_supine,,catecholamines
+norepinephrine_plasma_upright,,catecholamines
+dopamine_plasma_supine,,catecholamines
+dopamine_plasma_upright,,catecholamines
+catecholamines_total_plasma_supine,,catecholamines
+catecholamines_total_plasma_upright,,catecholamines
+cortisol_saliva_morning,salivary cortisol am,saliva
+cortisol_saliva_noon,,saliva
+cortisol_saliva_evening,,saliva
+cortisol_saliva_night,salivary cortisol pm|salivary cortisol bedtime,saliva
+estradiol_saliva,,saliva
+progesterone_saliva,,saliva
+testosterone_saliva,,saliva
+dhea_s_saliva,,saliva
+stool_calprotectin,calprotectin|fecal calprotectin,stool
+stool_elastase_1,pancreatic elastase|fecal elastase,stool
+stool_occult_blood_fit,fit|fecal immunochemical test|fecal occult blood,stool
+stool_h_pylori_pcr,,stool
+stool_secretory_iga,secretory iga,stool
+stool_steatocrit,fecal fat,stool
+stool_beta_glucuronidase,,stool
+stool_anti_gliadin_iga,,stool
+stool_eosinophil_activation_protein,edn|eosinophil protein x,stool

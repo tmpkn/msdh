@@ -36,6 +36,19 @@ Uncertainties and assumptions.
 Inference and cross-references, clearly labelled as such.
 ```
 
-If a device export is large tabular data (continuous glucose, blood pressure
-log), store the raw export in `source/` and a processed CSV next to this
-file with the same stem; the markdown describes the columns.
+## CSV sidecar
+
+A report whose substance is a long list of items (IgG food panel, stool
+microbiome PCR, urinary neurotransmitter profile, genetic variant list,
+device export) keeps its items in a CSV with the same stem as the markdown:
+`2021-07-02_everlywell_food_igg.csv` beside `2021-07-02_everlywell_food_igg.md`.
+
+```
+date,item,value,unit,ref_low,ref_high,flag,source,notes
+```
+
+`item` is the report's own name for the row, lowercased. The markdown's
+*Structured values* section then lists only the handful of items worth a
+reader's attention, and *Findings* says what the report concluded. A few
+trendable values from such a report may also be entered as lab rows under
+canonical analyte names, pointing at the same source.

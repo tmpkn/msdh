@@ -62,8 +62,16 @@ Assessment header format is strict, four fields separated by ` | `:
 3. author: model ID, or clinician name with role in parentheses, or `patient`
 4. for a model: the runtime; for human or patient: the repo path of the source
 
-Assessments are appended in chronological order and never edited after the
-fact. A changed mind is a new assessment.
+The assessment date is the date the opinion was formed: for a model, the
+session date; for a human, the date of the document or visit in which they
+stated it, not the date it was transcribed into the record. A clinician's
+conclusion from a January letter ingested in November is dated January.
+
+Keep assessments in date order where practical, which means inserting an
+older human assessment above newer model ones when a historical document is
+ingested. The validator warns, and does not fail, on out-of-order entries;
+never falsify a date to satisfy ordering. The text of an assessment is never
+edited after the fact. A changed mind is a new assessment.
 
 ## Second opinions
 

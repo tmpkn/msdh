@@ -17,6 +17,13 @@ Everything you need is in `harness/`. Do not improvise outside it.
    runtime), verifies the record is in a sane state, and loads the patient
    context.
 
+## After a context reset
+
+Long sessions get summarised mid-way. When that happens, before the next
+action: re-read this file, run `python3 harness/scripts/msdh.py status` to
+recover your session identity and the state of the tree, and re-read the
+procedure you were in the middle of. The summary is not the procedure.
+
 ## Hard rules
 
 - **Every file you write carries provenance.** Model, runtime, date, harness

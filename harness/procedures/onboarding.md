@@ -56,9 +56,12 @@ it better or worse. Use `python3 harness/scripts/msdh.py symptoms` conventions
 for naming: short, lowercase, reusable.
 
 **Round 10, documents.** Do they have lab reports, letters, scans to bring
-in? Do not ingest them now; tell them ingest is the next step after
-onboarding and list what they mentioned under *Open questions* in the chat
-record.
+in? List what they mention under *Open questions* in the chat record.
+Ingest is a separate procedure: finish onboarding first (steps 3 to 6),
+then take the documents one by one through `ingest.md`. If the patient
+wants to start committing before round 10, or to bring documents in before
+answering it, close onboarding after round 9 and note the gap; round 10
+then happens naturally as the documents arrive.
 
 ## 3. Write the record
 

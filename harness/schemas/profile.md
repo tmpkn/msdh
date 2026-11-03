@@ -79,7 +79,10 @@ name,dose,route,frequency,start,end,prescriber,reason,source,notes
 | `notes` | Free text: brand, side effects, adherence |
 
 A row with an empty `end` is a current medication. `SUMMARY.md` lists exactly
-those.
+those. A medication that was stopped on an unknown date gets the best
+estimate as `end` (first of the month or year if that is all that is known)
+and the word `approximate` in `notes`; it must not be left open, or it will
+be read as current.
 
 ## `profile/specialists.csv`
 
@@ -92,7 +95,7 @@ name,role,institution,since,last_visit,notes
 | Column | Values |
 |---|---|
 | `name` | As the patient refers to them, e.g. `Dr Jane Smith` |
-| `role` | Specialty, lowercase: `gp`, `cardiologist`, `endocrinologist`, ... |
+| `role` | Specialty only, lowercase letters, spaces and slashes: `gp`, `cardiologist`, `nurse practitioner`, `urgent care physician assistant`. No commas, no qualifiers; those go in `notes`. Validated |
 | `institution` | Practice or hospital, may be empty |
 | `since` | Date of first visit, may be empty |
 | `last_visit` | Date of latest recorded visit, may be empty |

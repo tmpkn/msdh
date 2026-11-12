@@ -19,17 +19,28 @@ python3 harness/scripts/msdh.py blind-pack
 
 This writes `scratch/blind_<date>.md`: profile, medications, specialists,
 the full lab table, every lab provenance file, every visit and other file
-with their *Harness notes* removed, and the symptom log and journal. It
-contains everything humans and the patient have contributed and nothing a
-model has concluded.
+with their *Harness notes* removed, the symptom log and journal, and a
+genetics digest: counts by tier and every pathogenic, conflicting, risk
+and drug-response match. It contains everything humans and the patient
+have contributed and nothing a model has concluded. The command prints the
+pack's size; it is large, often several thousand lines.
 
 `scratch/` is not part of the record and is never committed.
 
 ## 2. Read it blind
 
-Read the pack in full and nothing else from the record. Do not open
-`SUMMARY.md`, `diags/`, `chats/`, or the *Harness notes* sections of the
-originals. Do not look at `git log`; commit subjects name hypotheses.
+Read the pack in full and nothing else from the record. If your file
+reader caps its output, read it in consecutive chunks until the last line;
+`grep -n '^====================' scratch/blind_<date>.md` lists the
+sections with their line numbers. Do not open `SUMMARY.md`, `diags/`,
+`chats/`, or the *Harness notes* sections of the originals. Do not look at
+`git log`; commit subjects name hypotheses.
+
+Two data queries are allowed while blind, because they read tables, not
+conclusions: `python3 harness/scripts/msdh.py labs trend <analyte>` and
+`python3 harness/scripts/msdh.py genetics list ...`. Use the latter to
+look up the uncertain and other tiers, which the pack leaves out, by gene
+or condition keyword once you know what the patient's problems are.
 
 ## 3. Assess
 

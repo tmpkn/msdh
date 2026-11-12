@@ -5,6 +5,24 @@ Patient records carry the harness version in every file they write
 what changed and whether a record written under an older version needs
 migrating.
 
+## 1.2.3 — 2026-11-12
+
+From the first second opinion by a non-Claude agent (DeepSeek). No
+migration needed.
+
+- `msdh.py blind-pack` carries a genetics digest instead of the raw
+  variants table: counts by tier plus every pathogenic, conflicting, risk
+  and drug-response match. The uncertain and other tiers, about 40% of
+  the old pack and read as noise, are left to `genetics list` queries,
+  which the second-opinion procedure now allows while blind along with
+  `labs trend`. The command reports the pack's size.
+- second-opinion: how to read the pack when the agent's file reader caps
+  its output.
+- summary-refresh: a pending or watch-list item is dropped only when the
+  record shows it done, and the drop is named under *Recent changes*;
+  length is a ceiling, not a target. The DeepSeek refresh matched the
+  previous line count exactly and lost two pending items doing so.
+
 ## 1.2.2 — 2026-11-03
 
 - Fix: `msdh.py genetics summary` without `--file` crashed trying to read

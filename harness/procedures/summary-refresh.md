@@ -31,7 +31,9 @@ Read `harness/schemas/summary.md` for the exact sections. Then:
 - The last several files by date across `data/visits/`, `data/other/`,
   `chats/` for *Recent changes* and *Pending and recommended*.
 - The previous `SUMMARY.md`, to carry forward items that are still true and
-  to notice what has changed.
+  to notice what has changed. Make a list of its *Pending and recommended*
+  and *Watch list* items before you write; each one either reappears or is
+  dropped for a reason you can name.
 
 ## 3. Write
 
@@ -49,7 +51,14 @@ Rules that matter here:
   since 2026-09"*.
 - *Watch list* is for drift that is not yet a problem. Give the span and the
   direction: *"ferritin falling, 88 to 31 over 2024-03 to 2026-11"*.
-- Keep it near one page. Prune *Recent changes* beyond ten entries.
+- A pending or watch-list item leaves the summary only when the record
+  shows it done, superseded or no longer true, and the drop is named under
+  *Recent changes* ("closed: urgent-care summary obtained, see ..."). The
+  summary is the only place a patient sees what they still owe their
+  doctors; an item forgotten here is forgotten everywhere.
+- Keep it near one page. Prune *Recent changes* beyond ten entries. Length
+  is a ceiling, not a target: do not pad a short summary and do not cut
+  items to hit a line count. Tighten the wording instead.
 - Nothing urgent lives only here. If writing the summary makes you notice
   something urgent, tell the patient now.
 

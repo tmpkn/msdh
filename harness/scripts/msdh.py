@@ -978,10 +978,13 @@ def cmd_blind_pack(args) -> int:
         parts.append(f"\n\n==================== {title} ====================\n\n{body}")
 
     for name in ("profile/profile.md", "profile/medications.csv", "profile/specialists.csv",
-                 "data/labs_all.csv", "symptoms/log.csv", "data/genetics/variants.csv"):
+                 "data/labs_all.csv", "symptoms/log.csv"):
         p = ROOT / name
         if p.exists():
             add(name, p.read_text(encoding="utf-8"))
+    variants = ROOT / "data" / "genetics" / "variants.csv"
+    if variants.exists():
+        add("data/genetics/variants.csv (digest)", genetics_digest(variants))
     dated: list[Path] = []
     dated += list((ROOT / "data" / "labs").glob("*.md"))
     dated += list((ROOT / "data" / "visits").glob("*.md"))
@@ -1001,9 +1004,12 @@ def cmd_blind_pack(args) -> int:
     out = out_dir / f"blind_{today()}.md"
     header = (f"# Blind pack, {today()}\n\nPrimary record only: profile, medications, specialists, "
               "lab table, lab provenance notes, visits and other inputs with harness notes removed, "
-              "symptom log and journal. No summary, no diagnoses, no chats.\n")
-    out.write_text(header + "".join(parts), encoding="utf-8")
-    print(f"blind-pack: wrote {rel(out)} ({len(parts)} sections)")
+              "symptom log and journal, genetics digest. No summary, no diagnoses, no chats.\n")
+    text = header + "".join(parts)
+    out.write_text(text, encoding="utf-8")
+    lines = text.count("\n")
+    print(f"blind-pack: wrote {rel(out)} ({len(parts)} sections, {lines:,} lines, "
+          f"{len(text) // 1024:,} KB, roughly {max(1, len(text) // 4000):,}k tokens)")
     return 0
 
 
@@ -1060,6 +1066,27 @@ def load_variants(path: Path) -> list[dict]:
 
 
 GENETICS_TIERS = ["pathogenic", "conflicting", "risk", "drug_response", "uncertain", "other", "benign"]
+
+BLIND_TIERS = ["pathogenic", "conflicting", "risk", "drug_response"]
+
+
+def genetics_digest(path: Path) -> str:
+    """The match table as a blind reader needs it: counts, then every row of the
+    tiers that carry a classification. The uncertain and other tiers are left
+    to targeted queries; they are mostly noise read line by line."""
+    rows = load_variants(path)
+    tiers = {t: sum(1 for r in rows if r["tier"] == t) for t in GENETICS_TIERS}
+    out = [f"Source: {rel(path)}, {len(rows)} matches. By tier: "
+           + ", ".join(f"{t} {n}" for t, n in tiers.items() if n) + ".",
+           "Listed in full below: " + ", ".join(BLIND_TIERS) + ". The uncertain and other tiers are not "
+           "listed; query them by gene or condition keyword with "
+           "`python3 harness/scripts/msdh.py genetics list --tier uncertain,other --gene X` or `--search word`. "
+           "Columns: gene, variant, zygosity, stars, flags (A=ACMG SF, L=low penetrance), tier, clinsig, conditions.",
+           ""]
+    sel = [r for r in rows if r["tier"] in BLIND_TIERS]
+    sel.sort(key=lambda r: (GENETICS_TIERS.index(r["tier"]), -int(r["stars"] or 0), r["gene"]))
+    out += [fmt_variant(r) for r in sel]
+    return "\n".join(out) + "\n"
 
 
 def fmt_variant(r: dict) -> str:

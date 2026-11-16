@@ -25,7 +25,7 @@ jobs:
             git cat-file -e "$base" 2>/dev/null || base=$(git rev-list --max-parents=0 HEAD | tail -1)
           fi
           bad=$(git diff --name-only "$base" HEAD | grep -v -E \
-            '^(AGENTS\.md|CLAUDE\.md|README\.md|\.gitignore|harness/|\.github/|[a-z/_]+/\.gitkeep)$' || true)
+            '^(AGENTS\.md|CLAUDE\.md|README\.md|\.gitignore|harness/.+|\.github/.+|[a-z/_]+/\.gitkeep)$' || true)
           if [ -n "$bad" ]; then
             echo "These paths are outside the harness-owned set and must not enter this repository:"
             echo "$bad"
@@ -36,7 +36,7 @@ jobs:
       - name: No record content is tracked
         run: |
           bad=$(git ls-files | grep -v -E \
-            '^(AGENTS\.md|CLAUDE\.md|README\.md|\.gitignore|harness/|\.github/|[a-z/_]+/\.gitkeep)$' || true)
+            '^(AGENTS\.md|CLAUDE\.md|README\.md|\.gitignore|harness/.+|\.github/.+|[a-z/_]+/\.gitkeep)$' || true)
           if [ -n "$bad" ]; then
             echo "Tracked files outside the harness-owned set:"
             echo "$bad"

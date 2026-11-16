@@ -5,6 +5,43 @@ Patient records carry the harness version in every file they write
 what changed and whether a record written under an older version needs
 migrating.
 
+## 1.2.4 — 2026-11-16
+
+The harness is now public at https://github.com/tmpkn/msdh. This release
+adds the guards that make a public upstream safe for private records.
+
+- Records keep `upstream` fetch-only: the README setup disables its push
+  URL, and `msdh.py status` and `check-remote` warn when it is pushable.
+  The session-start procedure fixes it on sight. AGENTS.md gains the rule
+  "never push to upstream".
+- `.github/` joins the harness-owned set. A GitHub Actions check fails any
+  pull request or push that changes a file outside that set, and fails if
+  the repository ever tracks one.
+- README: clone from GitHub; contributing notes.
+
+Migration, two commands in every existing record:
+
+```
+git remote set-url upstream https://github.com/tmpkn/msdh.git
+git remote set-url --push upstream DISABLED
+```
+
+Records created before the publication merged the harness's pre-publication
+history, which was rewritten before the first push to GitHub. Such a record
+has no common ancestor with the published history. Once, before the first
+update from GitHub, in the record:
+
+```
+git fetch upstream
+git merge -s ours --allow-unrelated-histories upstream/master \
+  -m "harness-update: adopt the published harness history" \
+  -m "Model: <model>" -m "Runtime: <runtime>"
+```
+
+`-s ours` keeps the record's tree exactly as it is; the merge only tells git
+that the published history is now an ancestor. The harness-update procedure
+then works unchanged.
+
 ## 1.2.3 — 2026-11-12
 
 From the first second opinion by a non-Claude agent (DeepSeek). No

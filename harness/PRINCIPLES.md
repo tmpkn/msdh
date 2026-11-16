@@ -72,9 +72,16 @@ confirm.
 ## 5. Harness and record are separable
 
 The harness upstream repository contains only `AGENTS.md`, `CLAUDE.md`,
-`README.md`, `.gitignore`, `harness/`, and empty record directories. A patient
-record is a clone of it with its own private origin and the harness repository
-kept as an `upstream` remote. Updating the harness is a pull from upstream.
+`README.md`, `.gitignore`, `harness/`, `.github/`, and empty record
+directories. A patient record is a clone of it with its own private origin
+and the harness repository kept as a fetch-only `upstream` remote. Updating
+the harness is a pull from upstream.
+
+The upstream is public. Three guards keep records out of it: the record's
+upstream push URL is disabled and the status command warns when it is not;
+the commit command refuses to touch harness-owned paths; and the upstream's
+pull-request check rejects any change outside the harness-owned set, so a
+contributor cannot merge their own record by accident.
 
 Guarantees that make this conflict-free:
 

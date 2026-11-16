@@ -16,12 +16,17 @@ CSV in git. Design rationale is in `harness/PRINCIPLES.md`.
 2. Clone this harness and repoint it:
 
    ```
-   git clone <harness-repo-url> my-record
+   git clone https://github.com/tmpkn/msdh.git my-record
    cd my-record
    git remote rename origin upstream
+   git remote set-url --push upstream DISABLED
    git remote add origin <your-private-repo-url>
    git push -u origin master
    ```
+
+   The third line matters: this harness repository is public, and disabling
+   the push URL makes it impossible to push your record to it by mistake.
+   The agent's status check warns if it is ever re-enabled.
 
 3. Open your agent in `my-record` and say: *"onboard me"*. The agent will ask
    who it is running as, then walk you through an intake questionnaire.
@@ -51,7 +56,16 @@ git pull upstream master
 ```
 
 The harness only ever touches `AGENTS.md`, `CLAUDE.md`, `README.md`,
-`.gitignore` and `harness/`. Your record files are never affected.
+`.gitignore`, `.github/` and `harness/`. Your record files are never affected.
+
+## Contributing
+
+Pull requests are welcome. Work in a clone of this repository, not in your
+record: a record must never be pushed anywhere public, and the pull-request
+check fails on any change outside the harness-owned files above. Run
+`python3 harness/scripts/msdh.py validate` before opening one, bump
+`harness/VERSION` and add a `harness/CHANGELOG.md` entry for anything a
+record would notice.
 
 ## Helper script
 

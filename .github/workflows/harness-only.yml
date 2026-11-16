@@ -1,0 +1,47 @@
+# Pull requests may change only harness-owned files. A contributor who opens a
+# pull request from their own record by mistake is stopped here, before anyone
+# can merge health information into a public repository.
+name: harness-only
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Changed files stay inside the harness-owned set
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+          else
+            base="${{ github.event.before }}"
+            git cat-file -e "$base" 2>/dev/null || base=$(git rev-list --max-parents=0 HEAD | tail -1)
+          fi
+          bad=$(git diff --name-only "$base" HEAD | grep -v -E \
+            '^(AGENTS\.md|CLAUDE\.md|README\.md|\.gitignore|harness/|\.github/|[a-z/_]+/\.gitkeep)$' || true)
+          if [ -n "$bad" ]; then
+            echo "These paths are outside the harness-owned set and must not enter this repository:"
+            echo "$bad"
+            exit 1
+          fi
+          echo "all changed files are harness-owned"
+
+      - name: No record content is tracked
+        run: |
+          bad=$(git ls-files | grep -v -E \
+            '^(AGENTS\.md|CLAUDE\.md|README\.md|\.gitignore|harness/|\.github/|[a-z/_]+/\.gitkeep)$' || true)
+          if [ -n "$bad" ]; then
+            echo "Tracked files outside the harness-owned set:"
+            echo "$bad"
+            exit 1
+          fi
+
+      - name: Validate
+        run: python3 harness/scripts/msdh.py validate

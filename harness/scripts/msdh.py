@@ -37,7 +37,7 @@ from pathlib import Path
 # constants
 # --------------------------------------------------------------------------
 
-HARNESS_OWNED = ("AGENTS.md", "CLAUDE.md", "README.md", ".gitignore", "harness")
+HARNESS_OWNED = ("AGENTS.md", "CLAUDE.md", "README.md", ".gitignore", "harness", ".github")
 RECORD_DIRS = ("profile", "source", "data", "symptoms", "diags", "chats")
 DATED_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})_[a-z0-9_]+\.(md|csv)$")
 SOURCE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})_[A-Za-z0-9_.\-]+$")
@@ -722,9 +722,30 @@ def cmd_status(args) -> int:
         print("tree:     clean")
     remotes = git("remote", "-v", check=False)
     print("remotes:  " + (remotes.replace("\n", "\n          ") if remotes else "none"))
+    warn_upstream_pushable()
     stats = record_stats()
     print("record:   " + ", ".join(f"{v} {k}" for k, v in stats.items()))
     return 0
+
+
+def upstream_pushable() -> str | None:
+    """The upstream push URL if it still looks like a real remote, else None."""
+    url = git("remote", "get-url", "--push", "upstream", check=False)
+    if not url:
+        return None
+    if re.match(r"^(https?://|ssh://|git://|[^/\s]+@[^:\s]+:)", url) or Path(url).exists():
+        return url
+    return None
+
+
+def warn_upstream_pushable() -> bool:
+    url = upstream_pushable()
+    if url:
+        print(f"WARNING:  upstream is pushable ({url}). The harness repository is public; a mistaken\n"
+              "          'git push upstream' would publish this record. Disable it:\n"
+              "          git remote set-url --push upstream DISABLED")
+        return True
+    return False
 
 
 def http_status(url: str) -> int | None:
@@ -760,6 +781,7 @@ def cmd_check_remote(args) -> int:
         return 2
     host, path = parsed
     print(f"origin: {url}")
+    warn_upstream_pushable()
     if host == "github.com":
         code = http_status(f"https://api.github.com/repos/{path}")
         if code == 200:

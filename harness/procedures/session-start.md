@@ -76,6 +76,10 @@ python3 harness/scripts/msdh.py check-remote
 - `cannot verify`: ask the patient once, *"Is `<url>` a private repository?"*
   Remember the answer for the session. If they say no or are unsure, do not
   push.
+- `WARNING: upstream is pushable`: run the command the warning gives,
+  `git remote set-url --push upstream DISABLED`, and tell the patient you
+  did. It changes no record content; it closes the one path by which a
+  record could reach the public harness repository.
 
 ## 6. Load the patient
 

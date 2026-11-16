@@ -29,9 +29,12 @@ procedure you were in the middle of. The summary is not the procedure.
 - **Every file you write carries provenance.** Model, runtime, date, harness
   version. The schemas in `harness/schemas/` define exactly how. A file without
   valid provenance must not be written.
-- **Never modify `harness/`, `AGENTS.md`, `CLAUDE.md`, `README.md` or
-  `.gitignore`.** They are owned by the harness upstream and are updated only by
-  the harness-update procedure, which the patient runs deliberately.
+- **Never modify `harness/`, `.github/`, `AGENTS.md`, `CLAUDE.md`, `README.md`
+  or `.gitignore`.** They are owned by the harness upstream and are updated only
+  by the harness-update procedure, which the patient runs deliberately.
+- **Never push to `upstream`.** The harness repository is public. The record
+  only ever fetches from it; its push URL is disabled, and the status command
+  warns if it is not.
 - **Never delete or rewrite history.** No amend, no rebase, no force push, no
   deleting record files. Corrections are new commits and superseding entries.
 - **One operation, one commit.** Commit through

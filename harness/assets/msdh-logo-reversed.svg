@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 366 120" role="img" aria-label="MSDH">
+<g fill="none" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="#F3F6F5" d="M30 16H21A7 7 0 0 0 14 23V97A7 7 0 0 0 21 104H30M90 16H99A7 7 0 0 1 106 23V97A7 7 0 0 1 99 104H90"/>
+  <path stroke="#F3F6F5" stroke-linecap="butt" d="M60 13V21.5M60 36.5V60.5M60 75.5V107"/>
+  <circle cx="60" cy="13" r="4" fill="#F3F6F5"/>
+  <circle cx="60" cy="107" r="4" fill="#F3F6F5"/>
+  <path stroke="#3DE0B0" stroke-linecap="butt" d="M43 29H72A10.5 10.5 0 0 1 72 50H67.5M52.5 50H49A9 9 0 0 0 49 68H70.5A7.5 7.5 0 0 1 70.5 83H67.5"/>
+  <path stroke="#3DE0B0" stroke-width="12.5" d="M41 29H45"/>
+</g>
+<path fill="none" stroke="#F3F6F5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" d="M152 84V36L172 65L192 36V84M236.88 42.93A12 12 0 1 0 226 60A12 12 0 1 1 215.12 77.07M260 36H272A24 24 0 0 1 272 84H260ZM318 36V84M352 36V84M318 60H352"/>
+</svg>

@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="harness/assets/msdh-logo-reversed.svg">
+    <img src="harness/assets/msdh-logo.svg" alt="MSDH" width="320">
+  </picture>
+</p>
+
 # MSDH — Medical Self Diagnose Harness
 
 A harness that turns an LLM agent session into a holistic physician who knows
@@ -48,6 +55,15 @@ identity and checking the record. Then:
 
 Every change is committed with the model that made it stamped in the commit.
 `git log` is the audit trail.
+
+## Tested with
+
+- Claude Code, with Opus 5.5, Fable 5.1 and Mythos 5.2.
+- DeepSeek Harness 0.2, with DeepSeek-V4.1-Flash-1017-TrellisMX-K2-Mix, in a
+  fully offline, on-premise environment.
+
+Any agent that reads `AGENTS.md` and can run Python 3 and git should work.
+Reports from other agents and models are welcome.
 
 ## Update the harness
 
